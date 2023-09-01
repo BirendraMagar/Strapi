@@ -8,7 +8,9 @@ import Payment from "./Payment";
 import Shipping from "./Shipping";
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(
+  "pk_test_51NiuW3JQjIbbl6QJmyaObngG7iZ7oLa7hCLVLcKGnShvtRCx7ajjlg2c6U9NDWyeEdePGFUQmBvGyOVtNbz3oQVC00WVnlf0TB"
+);
 
 const Checkout = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -19,26 +21,12 @@ const Checkout = () => {
   const handleFormSubmit = async (values, actions) => {
     setActiveStep(activeStep + 1);
 
-    if (isFirstStep) {
-      if (values.shippingAddress.isSameAddress) {
-        actions.setFieldValue("shippingAddress", {
-          ...values.billingAddress,
-          isSameAddress: true,
-        });
-      } else {
-        // Reset the shipping address fields when not same
-        actions.setFieldValue("shippingAddress", {
-          isSameAddress: false,
-          firstName: "",
-          lastName: "",
-          country: "",
-          street1: "",
-          street2: "",
-          city: "",
-          state: "",
-          zipCode: "",
-        });
-      }
+    // this copies the billing address onto shipping address
+    if (isFirstStep && values.shippingAddress.isSameAddress) {
+      actions.setFieldValue("shippingAddress", {
+        ...values.billingAddress,
+        isSameAddress: true,
+      });
     }
 
     if (isSecondStep) {
@@ -65,8 +53,9 @@ const Checkout = () => {
       body: JSON.stringify(requestBody),
     });
     const session = await response.json();
+    console.log("session Id:", session.id);
     await stripe.redirectToCheckout({
-      sessionId: response.stripeSession.id,
+      sessionId: session.id,
     });
   }
 
