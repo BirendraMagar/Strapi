@@ -8,9 +8,7 @@ import Payment from "./Payment";
 import Shipping from "./Shipping";
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe(
-  "pk_test_51NiuW3JQjIbbl6QJmyaObngG7iZ7oLa7hCLVLcKGnShvtRCx7ajjlg2c6U9NDWyeEdePGFUQmBvGyOVtNbz3oQVC00WVnlf0TB"
-);
+const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
 const Checkout = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -68,7 +66,7 @@ const Checkout = () => {
     });
     const session = await response.json();
     await stripe.redirectToCheckout({
-      sessionId: session.id,
+      sessionId: response.stripeSession.id,
     });
   }
 
